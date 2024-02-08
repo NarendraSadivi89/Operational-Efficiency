@@ -36,6 +36,5 @@ def main():
     if question:
         handle_question(question)
 
-
 if __name__ == '__main__':
     main()
