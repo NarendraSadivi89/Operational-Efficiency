@@ -61,7 +61,6 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      
       - name: Login to Azure
         uses: azure/login@v1
         with:
@@ -75,4 +74,6 @@ jobs:
         with:
           app-name: 'KnowledgeMgmtAIChat'
           slot-name: 'Production'
-          
+
+      - name: Deploy Streamlit
+        run: streamlit run Snow_Chat.py
