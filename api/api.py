@@ -1,21 +1,12 @@
 import os
 import pysnc
-import streamlit as st
 import pandas as pd
+from flask import Flask, request, jsonify
 from langchain.agents import AgentType
-from langchain_community.callbacks import StreamlitCallbackHandler
 from langchain_experimental.agents import create_pandas_dataframe_agent
 from langchain_openai import ChatOpenAI
 
-
-def handle_question(agent, prompt):
-    st.chat_message('user').write(prompt)
-    with st.chat_message('assistant'):
-        st_callback = StreamlitCallbackHandler(st.container())
-        response = agent.invoke(
-            {'input': prompt}, {'callbacks': [st_callback]}
-        )
-        st.write(response['output'])
+app = Flask(__name__)
 
 
 def provision_glide(record_type):
@@ -33,3 +24,15 @@ def provision_glide(record_type):
         verbose=True,
         agent_type=AgentType.OPENAI_FUNCTIONS,
     )
+
+
+@app.route('/handle_question', methods=['POST'])
+def api_glide_question():
+    request_json = request.get_json()
+    record_type = request_json['record_type']
+    prompt = request_json['prompt']
+    agent = provision_glide(record_type)
+    response = agent.invoke(
+        {'input': prompt}
+    )
+    return jsonify(response['output'])
