@@ -34,6 +34,5 @@ class ChatPage:
             if prompt := st.chat_input():
                 handle_question(agent, prompt)
         else:
-            print('Confluence')
             if prompt := st.chat_input():
                 handle_confluence(prompt)
