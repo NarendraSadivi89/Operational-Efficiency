@@ -1,7 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
 from htmlTemplates import css
-from utils.Confluence_Utils import provision_confluence
+from utils.Confluence_Utils import handle_confluence
 from utils.Utils import provision_glide, handle_question
 
 
@@ -34,8 +34,6 @@ class ChatPage:
             if prompt := st.chat_input():
                 handle_question(agent, prompt)
         else:
-            # TODO: Confluence
-            try:
-                provision_confluence()
-            except Exception:
-                pass
+            print('Confluence')
+            if prompt := st.chat_input():
+                handle_confluence(prompt)

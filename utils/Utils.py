@@ -21,7 +21,6 @@ def handle_question(agent, prompt):
 def provision_glide(record_type):
     client = pysnc.ServiceNowClient('https://cgigroupincdemo15.service-now.com', ('api_user', os.getenv('snow_pass')))
     gr = client.GlideRecord(record_type)
-    gr.add_query('active', 'true')
     gr.query()
     df = pd.DataFrame(gr.to_pandas())
     print(df)
