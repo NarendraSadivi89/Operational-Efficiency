@@ -1,6 +1,6 @@
 # Knowledge Management AI Chat
 
-AI leveraging LLMs to chat with Confluence, ServiceNow, and CMDB data.
+# AI leveraging LLMs to chat with Confluence, ServiceNow, and CMDB data.
 
 ### Requirements
 
