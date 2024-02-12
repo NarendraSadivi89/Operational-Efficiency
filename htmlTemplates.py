@@ -44,7 +44,3 @@ user_template = '''
     
 </div>
 '''
-
-chat_link_template = '''
-<a href="/Chat">go to the chat page</a>
-'''
