@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```
 ### Run
 ```commandline
-streamlit run SnowChat.py
+streamlit run ChatPage.py
 ```
 ### Docker
 Once again, you will need to provision your api keys in a .env file at the root of the project directory.
