@@ -5,7 +5,8 @@ def main():
     ChatPage(
         page_title="Confluence Chat",
         page_icon="📝",
-        header="Confluence Chat 📝"
+        header="Confluence Chat 📝",
+        glider_based=False
     )
 
 
