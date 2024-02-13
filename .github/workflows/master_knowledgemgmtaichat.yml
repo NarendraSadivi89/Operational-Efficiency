@@ -76,4 +76,4 @@ jobs:
           slot-name: 'Production'
 
       - name: Deploy Streamlit
-        run: streamlit run Snow_Chat.py
+        run: streamlit run SnowChat.py
