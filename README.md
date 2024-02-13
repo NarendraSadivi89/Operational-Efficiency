@@ -2,7 +2,7 @@
 
 AI leveraging LLMs to chat with Confluence, ServiceNow, and CMDB data.
 
-![TechStackDiagram.png](..%2F..%2FDownloads%2FTechStackDiagram.png)
+![TechStackDiagram.png](assets%2FTechStackDiagram.png)
 
 ### Requirements
 
