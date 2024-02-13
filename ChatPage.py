@@ -1,8 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
 from htmlTemplates import css
-from utils.ConfluenceUtils import handle_confluence
-from utils.Utils import provision_glide, handle_question
+from utils.Utils import provision, handle_question
 
 
 class ChatPage:
@@ -10,12 +9,9 @@ class ChatPage:
             self,
             page_title,
             page_icon,
-            header,
-            options=None,
-            glider_based=False
+            header
     ):
         load_dotenv()
-
         st.set_page_config(page_title=page_title, page_icon=page_icon)
         st.write(css, unsafe_allow_html=True)
         st.header(header)
@@ -25,14 +21,17 @@ class ChatPage:
         #
         # if "chat_history" not in st.session_state:
         #     st.session_state.chat_history = None
-        if glider_based:
-            label = 'Please choose the record type you\'re attempting to chat about.'
-            record_type = st.selectbox(label=label, options=options, placeholder="Choose an option")
-            agent = provision_glide(record_type)
+        with st.spinner('Loading...'):
+            chain, agent = provision()
 
-            st.container()
-            if prompt := st.chat_input():
-                handle_question(agent, prompt)
-        else:
-            if prompt := st.chat_input():
-                handle_confluence(prompt)
+        st.container()
+        if prompt := st.chat_input():
+            handle_question(agent, chain, prompt)
+
+
+if __name__ == '__main__':
+    ChatPage(
+        page_title="Chat",
+        page_icon="🤖",
+        header="Ask your question"
+    )
