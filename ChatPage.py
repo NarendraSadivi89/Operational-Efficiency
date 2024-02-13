@@ -1,7 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
 from htmlTemplates import css
-from utils.Confluence_Utils import handle_confluence
+from utils.ConfluenceUtils import handle_confluence
 from utils.Utils import provision_glide, handle_question
 
 
