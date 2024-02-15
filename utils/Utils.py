@@ -41,13 +41,15 @@ def provision():
     #cmdb_ci_application_software
     
     conn = sqlite3.connect("glide.db")
-    for table_name in table_list:
-        gr = client.GlideRecord(table_name)
-        gr.query()
-        df = pd.DataFrame(gr.to_pandas())
-        df.to_sql(table_name, conn, if_exists='replace')
+    if os.path.exists('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db'):
+        if os.path.getsize('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db') == 0:
+            for table_name in table_list:
+                gr = client.GlideRecord(table_name)
+                gr.query()
+                df = pd.DataFrame(gr.to_pandas())
+                df.to_sql(table_name, conn, if_exists='replace')
 
-    llm = ChatOpenAI(model='gpt-3.5-turbo-1106', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-0301', temperature=0)
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
     agent = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
