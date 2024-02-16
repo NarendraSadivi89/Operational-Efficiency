@@ -2,4 +2,5 @@
 .venv/
 .idea/*
 _pycache_/*
+_pycache_
 glide.db
