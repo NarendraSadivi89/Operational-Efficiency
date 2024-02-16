@@ -3,28 +3,35 @@ import pysnc
 import sqlite3
 import streamlit as st
 import pandas as pd
+from langchain.agents import initialize_agent, AgentType
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.agent_toolkits import create_sql_agent
-from langchain_community.callbacks import StreamlitCallbackHandler
+from langchain_community.agent_toolkits import create_sql_agent, JiraToolkit
 from langchain_community.document_loaders import ConfluenceLoader
 from langchain_community.document_transformers import Html2TextTransformer
+from langchain_community.utilities.jira import JiraAPIWrapper
 from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
-def handle_question(agent, chain, prompt):
+def handle_question(sql_agent, chain, jira_agent, prompt):
     st.chat_message('user').write(prompt)
-    response = chain(prompt)
-    st.write(f"From Confluence:\n\n{response['result']}")
+
+    with st.spinner('Loading...'):
+        response = chain(prompt)
+    st.write("From Confluence:\n\n")
+    st.chat_message('assistant').write(response)
+
+    with st.spinner('Loading...'):
+        response = jira_agent.run(prompt)
+    st.write("From JIRA:\n\n")
+    st.chat_message('assistant').write(response)
+
+    with st.spinner('Loading...'):
+        response = sql_agent.run(prompt)
     st.write("From ServiceNOW/CMDB:\n\n")
-    with st.chat_message('assistant'):
-        st_callback = StreamlitCallbackHandler(st.container())
-        response = agent.invoke(
-            {'input': prompt}, {'callbacks': [st_callback]}
-        )
-        st.write(response['output'])
+    st.chat_message('assistant').write(response)
 
 
 def provision():
@@ -49,10 +56,10 @@ def provision():
                 df = pd.DataFrame(gr.to_pandas())
                 df.to_sql(table_name, conn, if_exists='replace')
 
-    llm = ChatOpenAI(model='gpt-3.5-turbo-0301', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-1106', temperature=0)
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
-    agent = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
+    sql_agent = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=False)
 
     loader = ConfluenceLoader(
         url=os.getenv('confluence_url'),
@@ -79,4 +86,10 @@ def provision():
         retriever=knowledge_base.as_retriever()
     )
 
-    return chain, agent
+    jira = JiraAPIWrapper()
+    toolkit = JiraToolkit.from_jira_api_wrapper(jira)
+    jira_agent = initialize_agent(
+        toolkit.get_tools(), llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+    )
+
+    return chain, sql_agent, jira_agent
