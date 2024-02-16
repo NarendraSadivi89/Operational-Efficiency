@@ -1,5 +1,5 @@
 .env
 .venv/
 .idea/*
-_pycache_/*
+**/__pycache__/
 glide.db

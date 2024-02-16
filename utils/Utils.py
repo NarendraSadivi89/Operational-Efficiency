@@ -21,9 +21,7 @@ def handle_question(agent, chain, prompt):
     st.write("From ServiceNOW/CMDB:\n\n")
     with st.chat_message('assistant'):
         st_callback = StreamlitCallbackHandler(st.container())
-        response = agent.invoke(
-            {'input': prompt}, {'callbacks': [st_callback]}
-        )
+        response = agent.invoke({'input': prompt}, {'callbacks': [st_callback]})
         st.write(response['output'])
 
 
@@ -41,15 +39,14 @@ def provision():
     #cmdb_ci_application_software
     
     conn = sqlite3.connect("glide.db")
-    if os.path.exists('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db'):
-        if os.path.getsize('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db') == 0:
-            for table_name in table_list:
-                gr = client.GlideRecord(table_name)
-                gr.query()
-                df = pd.DataFrame(gr.to_pandas())
-                df.to_sql(table_name, conn, if_exists='replace')
+    if os.path.exists('glide.db') and os.path.getsize('glide.db') == 0:
+        for table_name in table_list:
+            gr = client.GlideRecord(table_name)
+            gr.query()
+            df = pd.DataFrame(gr.to_pandas())
+            df.to_sql(table_name, conn, if_exists='replace')
 
-    llm = ChatOpenAI(model='gpt-3.5-turbo-0301', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0.5)
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
     agent = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
