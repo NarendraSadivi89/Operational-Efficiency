@@ -14,6 +14,7 @@ class ChatPage:
         load_dotenv()
         st.set_page_config(page_title=page_title, page_icon=page_icon)
         st.write(css, unsafe_allow_html=True)
+        st.image('assets/cgi-logo.png')
         st.header(header)
 
         # if "conversation" not in st.session_state:
