@@ -24,7 +24,10 @@ def handle_question(sql_agent, chain, jira_agent, prompt):
     st.chat_message('assistant').write(response)
 
     with st.spinner('Loading...'):
-        response = jira_agent.run(prompt)
+        try:
+            response = jira_agent.run(prompt)
+        except Exception:
+            response = "I don't know."
     st.write("From JIRA:\n\n")
     st.chat_message('assistant').write(response)
 
