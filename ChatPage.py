@@ -23,11 +23,11 @@ class ChatPage:
         # if "chat_history" not in st.session_state:
         #     st.session_state.chat_history = None
         with st.spinner('Loading...'):
-            chain, agent = provision()
+            sql_agent, jira_agent, chain = provision()
 
         st.container()
         if prompt := st.chat_input():
-            handle_question(agent, chain, prompt)
+            handle_question(sql_agent, chain, jira_agent, prompt)
 
 
 if __name__ == '__main__':
