@@ -51,8 +51,8 @@ def provision():
     #cmdb_ci_application_software
     
     conn = sqlite3.connect("glide.db")
-    if os.path.exists('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db'):
-        if os.path.getsize('C:/Users/naren/LatestAICode/Knowledge_Mgmt_AI_Chat/glide.db') == 0:
+    if os.path.exists('glide.db'):
+        if os.path.getsize('glide.db') == 0:
             for table_name in table_list:
                 gr = client.GlideRecord(table_name)
                 gr.query()
