@@ -17,6 +17,7 @@ class ChatPage:
         st.set_page_config(page_title=page_title, page_icon=page_icon)
         # st.write(css, unsafe_allow_html=True)
         with st.sidebar:
+            st.subheader('Helpful Info & Resources')
             st.info('ℹ  Use the Knowledge Base Chatbot to ask questions in regards to your Confluence, ServiceNOW, '
                     'CMDB, and JIRA instances. You can scope your query to specific knowledge bases using the \'Seek '
                     'answers from:\' expander. Input your question in the provided space towards the bottom of the'
