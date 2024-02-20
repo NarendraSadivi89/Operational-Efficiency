@@ -4,7 +4,7 @@ import sqlite3
 import streamlit as st
 import pandas as pd
 from langchain.agents import initialize_agent, AgentType
-from langchain.chains import RetrievalQA, VectorDBQA
+from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.agent_toolkits import create_sql_agent, JiraToolkit
 from langchain_community.document_loaders import ConfluenceLoader
