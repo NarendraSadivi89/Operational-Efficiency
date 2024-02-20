@@ -20,11 +20,14 @@ def handle_question(sql_agent, chain, jira_agent, prompt):
 
     with st.spinner('Loading...'):
         response = chain(prompt)
-    st.write("From Confluence:\n\n")
-    st.chat_message('assistant').write(response)
+    st.write("From Confluence:\n\n") 
+    st.chat_message('assistant').write(response['result'])
 
     with st.spinner('Loading...'):
-        response = jira_agent.run(prompt)
+        try:
+            response = jira_agent.run(prompt)
+        except Exception:
+            response = "I don't know"
     st.write("From JIRA:\n\n")
     st.chat_message('assistant').write(response)
 
@@ -37,7 +40,8 @@ def handle_question(sql_agent, chain, jira_agent, prompt):
 def provision():
     client = pysnc.ServiceNowClient('https://cgigroupincdemo15.service-now.com', ('api_user', os.getenv('snow_pass')))
     table_list = ['task','incident','sys_user','sys_user_group','core_company','cmn_location','cmn_cost_center','cmn_department',
-                  'problem','kb_knowledge','change_request','change_task','std_change_producer_version',
+                  'problem','wf_workflow','kb_knowledge_base','kb_category','kb_knowledge','kb_feedback',
+                  'change_request','change_task','std_change_producer_version',
                   'cmdb','cmdb_ci','cmdb_rel_ci','cmdb_ci_computer','cmdb_ci_database','cmdb_ci_service',
                   'cmdb_ci_storage_device','cmdb_class_info','alm_asset','cmdb_model']
     #'incident_task',
@@ -70,20 +74,28 @@ def provision():
 
     tf = Html2TextTransformer()
     fd = tf.transform_documents(documents)
+    #print("printing fd /n/n")
+    #print(fd)
     ts = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
     splits = ts.split_documents(fd)
+    #print("printing ts/n/n")
+    #print(ts)
 
     embeddings = OpenAIEmbeddings()
     knowledge_base = Chroma.from_documents(
         documents=splits,
         embedding=embeddings
     )
+    #print("printing knowledge_base/n/n")
+    #print(knowledge_base)
 
     chain = RetrievalQA.from_chain_type(
         llm=llm,
         chain_type='stuff',
         retriever=knowledge_base.as_retriever()
     )
+    #print("printing chain /n/n")
+    #print(chain)
 
     jira = JiraAPIWrapper()
     toolkit = JiraToolkit.from_jira_api_wrapper(jira)
