@@ -59,7 +59,7 @@ def provision():
             df = pd.DataFrame(gr.to_pandas())
             df.to_sql(table_name, conn, if_exists='replace')
 
-    llm = ChatOpenAI(model='gpt-3.5-turbo-1106', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-0613', temperature=0)
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
     sql_agent = create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=False)
