@@ -28,7 +28,7 @@ class ChatPage:
             with st.expander("View Atlassian source instance URLs"):
                 st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
                          f'JIRA: {os.getenv("jira_instance_url")}\n\n'
-                         f'ServiceNow/CMDB: https://cgigroupincdemo15.service-now.com')
+                         f'ServiceNow/CMDB: {os.getenv("snow_url")}')
 
         st.image('assets/cgi-logo.png')
         st.header(header)
