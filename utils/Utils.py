@@ -23,9 +23,6 @@ def handle_question(sql_agent, chain, jira_agent, prompt):
         response = chain(conf_prompt)
     st.write("From Confluence:\n\n")
     st.chat_message('assistant').write(response['result'])
-        response = chain(prompt)
-    st.write("From Confluence:\n\n") 
-    st.chat_message('assistant').write(response['result'])
 
     with st.spinner('Loading...'):
         try:
@@ -57,17 +54,6 @@ def provision():
 
 def provision_snow(llm):
     client = pysnc.ServiceNowClient('https://cgigroupincdemo15.service-now.com', ('api_user', os.getenv('snow_pass')))
-    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'core_company', 'cmn_location', 'cmn_cost_center',
-                  'cmn_department',
-                  'problem', 'kb_knowledge', 'change_request', 'change_task', 'std_change_producer_version',
-                  'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer', 'cmdb_ci_database', 'cmdb_ci_service',
-                  'cmdb_ci_storage_device', 'cmdb_class_info', 'alm_asset', 'cmdb_model']
-    # 'incident_task',
-    # 'change_request_template','change_collision',
-    # cmdb_ci_network_host,
-    # cmdb_ci_cloud_service_account
-    # cmdb_ci_network_adapter
-    # cmdb_ci_application_software
 
     table_list = ['task','incident','sys_user','sys_user_group','core_company','cmn_location','cmn_cost_center','cmn_department',
                   'problem','wf_workflow','kb_knowledge_base','kb_category','kb_knowledge','kb_feedback',
@@ -107,7 +93,7 @@ def provision_confluence(llm):
     fd = tf.transform_documents(documents)
     #print("printing fd /n/n")
     #print(fd)
-    ts = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
     #print("printing ts/n/n")
     #print(ts)
