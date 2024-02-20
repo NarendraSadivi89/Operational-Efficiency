@@ -1,6 +1,8 @@
+import os
+
 import streamlit as st
 from dotenv import load_dotenv
-from htmlTemplates import css
+# from htmlTemplates import css
 from utils.Utils import provision, handle_question
 
 
@@ -13,20 +15,27 @@ class ChatPage:
     ):
         load_dotenv()
         st.set_page_config(page_title=page_title, page_icon=page_icon)
-        st.write(css, unsafe_allow_html=True)
+        # st.write(css, unsafe_allow_html=True)
+
+        with st.sidebar:
+            st.info('ℹ  Use the Knowledge Base Chatbot to ask questions in regards to your Confluence, ServiceNOW, '
+                    'CMDB, and JIRA instances. Input your question in the provided space towards the bottom of the '
+                    'screen.')
+            with st.expander("Take a look under the hood"):
+                st.image('assets/TechStackDiagram.png')
+                st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
+            with st.expander("View Atlassian source instance URLs"):
+                st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
+                         f'JIRA: {os.getenv("jira_instance_url")}\n\n')
+
         st.image('assets/cgi-logo.png')
         st.header(header)
 
-        # if "conversation" not in st.session_state:
-        #     st.session_state.conversation = None
-        #
-        # if "chat_history" not in st.session_state:
-        #     st.session_state.chat_history = None
         with st.spinner('Loading...'):
             sql_agent, jira_agent, chain = provision()
 
         st.container()
-        if prompt := st.chat_input():
+        if prompt := st.chat_input(placeholder="Ask about your Knowledge Base..."):
             handle_question(sql_agent, chain, jira_agent, prompt)
 
 
@@ -34,5 +43,5 @@ if __name__ == '__main__':
     ChatPage(
         page_title="Chat",
         page_icon="🤖",
-        header="Ask your question"
+        header="Ask Your Knowledge Base"
     )

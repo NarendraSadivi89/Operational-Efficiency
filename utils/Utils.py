@@ -4,7 +4,7 @@ import sqlite3
 import streamlit as st
 import pandas as pd
 from langchain.agents import initialize_agent, AgentType
-from langchain.chains import RetrievalQA
+from langchain.chains import RetrievalQA, VectorDBQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.agent_toolkits import create_sql_agent, JiraToolkit
 from langchain_community.document_loaders import ConfluenceLoader
@@ -19,10 +19,10 @@ def handle_question(sql_agent, chain, jira_agent, prompt):
     st.chat_message('user').write(prompt)
 
     with st.spinner('Loading...'):
-        conf_prompt = prompt + " Provide a url to source information in possible."
-        response = chain(conf_prompt)
+        response = chain(prompt)
     st.write("From Confluence:\n\n")
     st.chat_message('assistant').write(response['result'])
+    st.chat_message('assistant').write(response['source_documents'][0].metadata['source'])
 
     with st.spinner('Loading...'):
         try:
@@ -87,7 +87,7 @@ def provision_confluence(llm):
 
     tf = Html2TextTransformer()
     fd = tf.transform_documents(documents)
-    ts = RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=0)
+    ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
 
     embeddings = OpenAIEmbeddings()
@@ -99,7 +99,8 @@ def provision_confluence(llm):
     return RetrievalQA.from_chain_type(
         llm=llm,
         chain_type='stuff',
-        retriever=knowledge_base.as_retriever()
+        retriever=knowledge_base.as_retriever(),
+        return_source_documents=True
     )
 
 
