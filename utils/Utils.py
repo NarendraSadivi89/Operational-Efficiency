@@ -15,27 +15,29 @@ from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
-def handle_question(sql_agent, chain, jira_agent, prompt):
+def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
 
-    with st.spinner('Loading...'):
-        response = chain(prompt)
-    st.write("From Confluence:\n\n")
-    st.chat_message('assistant').write(response['result'])
-    st.chat_message('assistant').write(response['source_documents'][0].metadata['source'])
+    if seek_list[0]:
+        with st.spinner('Loading...'):
+            response = chain(prompt)
+        st.write("From Confluence:\n\n")
+        st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
 
-    with st.spinner('Loading...'):
-        try:
-            response = jira_agent.run(prompt)
-        except Exception:
-            response = "I don't know."
-    st.write("From JIRA:\n\n")
-    st.chat_message('assistant').write(response)
+    if seek_list[1]:
+        with st.spinner('Loading...'):
+            try:
+                response = jira_agent.run(prompt)
+            except Exception:
+                response = "I don't know."
+        st.write("From JIRA:\n\n")
+        st.chat_message('assistant').write(response)
 
-    with st.spinner('Loading...'):
-        response = sql_agent.run(prompt)
-    st.write("From ServiceNOW/CMDB:\n\n")
-    st.chat_message('assistant').write(response)
+    if seek_list[2]:
+        with st.spinner('Loading...'):
+            response = sql_agent.run(prompt)
+        st.write("From ServiceNOW/CMDB:\n\n")
+        st.chat_message('assistant').write(response)
 
 
 def provision():
