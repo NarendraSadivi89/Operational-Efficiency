@@ -15,31 +15,29 @@ from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
-def handle_question(sql_agent, chain, jira_agent, prompt):
+def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
 
-    with st.spinner('Loading...'):
-        conf_prompt = prompt + " Provide a url to source information in possible."
-        response = chain(conf_prompt)
-    st.write("From Confluence:\n\n")
-    st.chat_message('assistant').write(response['result'])
+    if seek_list[0]:
+        with st.spinner('Loading...'):
+            response = chain(prompt)
+        st.write("From Confluence:\n\n")
+        st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
 
-    with st.spinner('Loading...'):
-        try:
-            response = jira_agent.run(prompt)
-        except Exception:
-            response = "I don't know."
-        try:
-            response = jira_agent.run(prompt)
-        except Exception:
-            response = "I don't know"
-    st.write("From JIRA:\n\n")
-    st.chat_message('assistant').write(response)
+    if seek_list[1]:
+        with st.spinner('Loading...'):
+            try:
+                response = jira_agent.run(prompt)
+            except Exception:
+                response = "I don't know."
+        st.write("From JIRA:\n\n")
+        st.chat_message('assistant').write(response)
 
-    with st.spinner('Loading...'):
-        response = sql_agent.run(prompt)
-    st.write("From ServiceNOW/CMDB:\n\n")
-    st.chat_message('assistant').write(response)
+    if seek_list[2]:
+        with st.spinner('Loading...'):
+            response = sql_agent.run(prompt)
+        st.write("From ServiceNOW/CMDB:\n\n")
+        st.chat_message('assistant').write(response)
 
 
 def provision():
@@ -91,8 +89,6 @@ def provision_confluence(llm):
 
     tf = Html2TextTransformer()
     fd = tf.transform_documents(documents)
-    #print("printing fd /n/n")
-    #print(fd)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
     #print("printing ts/n/n")
@@ -109,7 +105,8 @@ def provision_confluence(llm):
     return RetrievalQA.from_chain_type(
         llm=llm,
         chain_type='stuff',
-        retriever=knowledge_base.as_retriever()
+        retriever=knowledge_base.as_retriever(),
+        return_source_documents=True
     )
     #print("printing chain /n/n")
     #print(chain)
