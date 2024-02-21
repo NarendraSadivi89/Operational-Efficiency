@@ -3,6 +3,7 @@ import pysnc
 import sqlite3
 import streamlit as st
 import pandas as pd
+from atlassian import Confluence
 from langchain.agents import initialize_agent, AgentType
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -51,7 +52,7 @@ def provision():
 
 
 def provision_snow(llm):
-    client = pysnc.ServiceNowClient(os.getenv('snow_url'), ('api_user', os.getenv('snow_pass')))
+    client = pysnc.ServiceNowClient(os.getenv('snow_url'), (os.getenv('snow_user'), os.getenv('snow_pass')))
     table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'core_company', 'cmn_location', 'cmn_cost_center',
                   'cmn_department', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
                   'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
@@ -84,7 +85,15 @@ def provision_confluence(llm):
         username=os.getenv('confluence_email'),
         api_key=os.getenv('confluence_api_key')
     )
-    space_keys = ['KB','APD']
+
+    confluence = Confluence(
+        url=os.getenv('confluence_url'),
+        username=os.getenv('confluence_email'),
+        password=os.getenv('confluence_api_key'),
+        cloud=True)
+
+    space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
+    print(space_keys)
     all_documents = []
     for space_key in space_keys:
         documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
@@ -92,7 +101,6 @@ def provision_confluence(llm):
 
     tf = Html2TextTransformer()
     fd = tf.transform_documents(all_documents)
-    #print(fd)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
 
