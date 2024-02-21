@@ -41,7 +41,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo-1106', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0)
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
@@ -84,11 +84,15 @@ def provision_confluence(llm):
         username=os.getenv('confluence_email'),
         api_key=os.getenv('confluence_api_key')
     )
-
-    documents = loader.load(space_key='KB', include_attachments=False, limit=50)
+    space_keys = ['KB','APD']
+    all_documents = []
+    for space_key in space_keys:
+        documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
+        all_documents.extend(documents)
 
     tf = Html2TextTransformer()
-    fd = tf.transform_documents(documents)
+    fd = tf.transform_documents(all_documents)
+    #print(fd)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
 
