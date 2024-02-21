@@ -93,7 +93,7 @@ def provision_confluence(llm):
         cloud=True)
 
     space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
-    print(space_keys)
+
     all_documents = []
     for space_key in space_keys:
         documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
