@@ -41,7 +41,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo-1106', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0) #add gpt-3.5-turbo-0613
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
