@@ -50,11 +50,11 @@ class ChatPage:
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
         with cent_co_button:
-            pred_prompt = 'How do I set java sys PATH?'
+            pred_prompt = 'How do I setup path system variables?'
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
         with right_co_button:
-            pred_prompt = 'What is Langchain?'
+            pred_prompt = 'How do I setup selenium?'
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
 
@@ -66,7 +66,6 @@ class ChatPage:
 
         st.container()
         if prompt := st.chat_input(placeholder="Ask about your Knowledge Base..."):
-
             handle_question(sql_agent, chain, jira_agent, prompt, seek_list)
 
 

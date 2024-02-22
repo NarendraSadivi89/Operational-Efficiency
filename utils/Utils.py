@@ -1,4 +1,5 @@
 import os
+import spacy
 import pysnc
 import sqlite3
 import streamlit as st
@@ -15,20 +16,49 @@ from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
+# Load the spaCy model
+nlp = spacy.load("en_core_web_sm")
+
+def extract_keywords(prompt):
+    # Process the prompt with spaCy
+    doc = nlp(prompt)
+    
+    # Initialize a set to hold unique keywords
+    keywords = set()
+
+    # Add nouns and proper nouns to keywords
+    for token in doc:
+        if token.pos_ in ["NOUN", "PROPN"]:
+            keywords.add(token.text.lower())
+    
+    # Add named entities to keywords
+    for ent in doc.ents:
+        keywords.add(ent.text.lower())
+    
+    return list(keywords)
 
 def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
 
+    keywords = extract_keywords(prompt)
+    print("printing keywords/n/n")
+    print(keywords)
+    print(" ".join(keywords))
+
     if seek_list[0]:
         with st.spinner('Loading...'):
-            response = chain(prompt)
+            response = chain(f"""Give me accurate information based on the '{prompt}'. If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
+                                          """)
+
         st.write("From Confluence:\n\n")
         st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
 
     if seek_list[1]:
         with st.spinner('Loading...'):
             try:
-                response = jira_agent.run(prompt)
+                response = jira_agent.run(f"""You are a JIRA chatbot and give me any relevant information from JIRA based on the '{prompt}'
+                                          """)
+                                           #or matching any one of the '{keywords}' or matching '{" ".join(keywords)}'.                             
             except Exception:
                 response = "I don't know."
         st.write("From JIRA:\n\n")
@@ -36,13 +66,16 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[2]:
         with st.spinner('Loading...'):
-            response = sql_agent.run(prompt)
+            #response = sql_agent.run(prompt)
+            response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. 
+                                     Give me accurate information based on the '{prompt}'. 
+                                     If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0)
+    llm = ChatOpenAI(model='gpt-4-0125-preview', temperature=0)
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
@@ -75,7 +108,7 @@ def provision_snow(llm):
 
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
-    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=False)
+    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
 
 
 def provision_confluence(llm):
@@ -92,12 +125,12 @@ def provision_confluence(llm):
         cloud=True)
 
     space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
-
+    print(space_keys)
     all_documents = []
     for space_key in space_keys:
         documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
         all_documents.extend(documents)
-
+    #print(all_documents)
     tf = Html2TextTransformer()
     fd = tf.transform_documents(all_documents)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
