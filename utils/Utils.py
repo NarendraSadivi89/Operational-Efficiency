@@ -3,6 +3,7 @@ import pysnc
 import sqlite3
 import streamlit as st
 import pandas as pd
+from atlassian import Confluence
 from langchain.agents import initialize_agent, AgentType
 from langchain.chains import RetrievalQA
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -41,7 +42,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0) #add gpt-3.5-turbo-0613
+    llm = ChatOpenAI(model='gpt-3.5-turbo', temperature=0)
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
@@ -51,20 +52,19 @@ def provision():
 
 
 def provision_snow(llm):
-    client = pysnc.ServiceNowClient('https://cgigroupincdemo15.service-now.com', ('api_user', os.getenv('snow_pass')))
+    client = pysnc.ServiceNowClient(os.getenv('snow_url'), (os.getenv('snow_user'), os.getenv('snow_pass')))
+    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'core_company', 'cmn_location', 'cmn_cost_center',
+                  'cmn_department', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
+                  'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
+                  'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer', 'cmdb_ci_database', 'cmdb_ci_service',
+                  'cmdb_ci_storage_device', 'cmdb_class_info', 'alm_asset', 'cmdb_model']
+    # 'incident_task',
+    # 'change_request_template', 'change_collision',
+    # cmdb_ci_network_host,
+    # cmdb_ci_cloud_service_account
+    # cmdb_ci_network_adapter
+    # cmdb_ci_application_software
 
-    table_list = ['task','incident','sys_user','sys_user_group','core_company','cmn_location','cmn_cost_center','cmn_department',
-                  'problem','wf_workflow','kb_knowledge_base','kb_category','kb_knowledge','kb_feedback',
-                  'change_request','change_task','std_change_producer_version',
-                  'cmdb','cmdb_ci','cmdb_rel_ci','cmdb_ci_computer','cmdb_ci_database','cmdb_ci_service',
-                  'cmdb_ci_storage_device','cmdb_class_info','alm_asset','cmdb_model']
-    #'incident_task',
-    #'change_request_template','change_collision',
-    #cmdb_ci_network_host,
-    #cmdb_ci_cloud_service_account
-    #cmdb_ci_network_adapter
-    #cmdb_ci_application_software
-    
     conn = sqlite3.connect("glide.db")
     if os.path.exists('glide.db') and os.path.getsize('glide.db') == 0:
         for table_name in table_list:
@@ -85,10 +85,21 @@ def provision_confluence(llm):
         api_key=os.getenv('confluence_api_key')
     )
 
-    documents = loader.load(space_key='KB', include_attachments=False, limit=50)
+    confluence = Confluence(
+        url=os.getenv('confluence_url'),
+        username=os.getenv('confluence_email'),
+        password=os.getenv('confluence_api_key'),
+        cloud=True)
+
+    space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
+
+    all_documents = []
+    for space_key in space_keys:
+        documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
+        all_documents.extend(documents)
 
     tf = Html2TextTransformer()
-    fd = tf.transform_documents(documents)
+    fd = tf.transform_documents(all_documents)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
     #print("printing ts/n/n")
