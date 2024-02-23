@@ -25,7 +25,7 @@ class ChatPage:
                 st.image('assets/TechStackDiagram.png')
                 st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
             with st.expander("View Atlassian source instance URLs"):
-                st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
+                st.write (f'Confluence: {os.getenv("confluence_url")}\n\n'
                          f'JIRA: {os.getenv("jira_instance_url")}\n\n'
                          f'ServiceNow/CMDB: {os.getenv("snow_url")}')
 
@@ -50,11 +50,11 @@ class ChatPage:
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
         with cent_co_button:
-            pred_prompt = 'How do I set java sys PATH?'
+            pred_prompt = 'How do I setup path system variables?'
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
         with right_co_button:
-            pred_prompt = 'What is Langchain?'
+            pred_prompt = 'How do I setup selenium?'
             if st.button(pred_prompt, type="primary"):
                 pred_clicked = pred_prompt
 
@@ -66,7 +66,6 @@ class ChatPage:
 
         st.container()
         if prompt := st.chat_input(placeholder="Ask about your Knowledge Base..."):
-
             handle_question(sql_agent, chain, jira_agent, prompt, seek_list)
 
 

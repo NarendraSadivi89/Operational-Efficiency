@@ -16,3 +16,4 @@ pytesseract
 reportlab
 svglib
 chromadb
+spacy

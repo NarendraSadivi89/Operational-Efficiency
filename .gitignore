@@ -1,6 +1,5 @@
 .env
 .venv/
 .idea/*
-_pycache_/*
-_pycache_
-glide.db
+**/__pycache__/
+glide.db/*
