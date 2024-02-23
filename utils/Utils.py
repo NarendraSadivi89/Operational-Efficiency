@@ -39,7 +39,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[0]:
         with st.spinner('Loading...'):
-            response = chain(f"""You are a confluence chat bot. Give me the accurate information based on the '{prompt}' in the first hit. 
+            response = chain(f"""You are a confluence chat bot. Give me the accurate information based on the '{prompt}'. 
                              If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
                                           """)
         st.write("From Confluence:\n\n")
@@ -58,8 +58,8 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[2]:
         with st.spinner('Loading...'):
-            response = sql_agent.run(f"""You are servicenow chatbot and have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. Give me accurate information based on the '{prompt}' in the first hit. 
-                                     If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
+            response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. Give me accurate information based on the '{prompt}'. 
+                                     If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and all the incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
