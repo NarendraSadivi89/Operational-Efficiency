@@ -16,12 +16,12 @@ from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 
-def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
+def handle_question(sql_agent, confluence_chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
 
     if seek_list[0]:
         with st.spinner('Loading...'):
-            response = chain(prompt)
+            response = confluence_chain(prompt)
         st.write("From Confluence:\n\n")
         st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
 
@@ -46,9 +46,9 @@ def provision():
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
-    chain = provision_confluence(llm)
+    confluence_chain = provision_confluence(llm)
 
-    return sql_agent, jira_agent, chain
+    return sql_agent, jira_agent, confluence_chain
 
 
 def provision_snow(llm):
@@ -66,13 +66,12 @@ def provision_snow(llm):
     # cmdb_ci_application_software
 
     conn = sqlite3.connect("glide.db")
-    if os.path.exists('glide.db'):
-        if os.path.getsize('glide.db') == 0:
-            for table_name in table_list:
-                gr = client.GlideRecord(table_name)
-                gr.query()
-                df = pd.DataFrame(gr.to_pandas())
-                df.to_sql(table_name, conn, if_exists='replace')
+    if not os.path.exists('glide.db') or os.path.getsize('glide.db') == 0:
+        for table_name in table_list:
+            gr = client.GlideRecord(table_name)
+            gr.query()
+            df = pd.DataFrame(gr.to_pandas())
+            df.to_sql(table_name, conn, if_exists='replace')
 
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
@@ -80,35 +79,44 @@ def provision_snow(llm):
 
 
 def provision_confluence(llm):
-    loader = ConfluenceLoader(
-        url=os.getenv('confluence_url'),
-        username=os.getenv('confluence_email'),
-        api_key=os.getenv('confluence_api_key')
-    )
+    if not os.path.exists(f'chroma_db_{os.getenv("confluence_email")}'):
+        loader = ConfluenceLoader(
+            url=os.getenv('confluence_url'),
+            username=os.getenv('confluence_email'),
+            api_key=os.getenv('confluence_api_key'),
+            cloud=True
+        )
 
-    confluence = Confluence(
-        url=os.getenv('confluence_url'),
-        username=os.getenv('confluence_email'),
-        password=os.getenv('confluence_api_key'),
-        cloud=True)
+        confluence = Confluence(
+            url=os.getenv('confluence_url'),
+            username=os.getenv('confluence_email'),
+            password=os.getenv('confluence_api_key'),
+            cloud=True)
 
-    space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
+        space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
 
-    all_documents = []
-    for space_key in space_keys:
-        documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
-        all_documents.extend(documents)
+        all_documents = []
+        for space_key in space_keys:
+            documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
+            all_documents.extend(documents)
 
-    tf = Html2TextTransformer()
-    fd = tf.transform_documents(all_documents)
-    ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
-    splits = ts.split_documents(fd)
+        tf = Html2TextTransformer()
+        fd = tf.transform_documents(all_documents)
+        ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
+        splits = ts.split_documents(fd)
 
-    embeddings = OpenAIEmbeddings()
-    knowledge_base = Chroma.from_documents(
-        documents=splits,
-        embedding=embeddings
-    )
+        embeddings = OpenAIEmbeddings()
+        knowledge_base = Chroma.from_documents(
+            documents=splits,
+            embedding=embeddings,
+            persist_directory=f'chroma_db_{os.getenv("confluence_email")}'
+        )
+    else:
+        embeddings = OpenAIEmbeddings()
+        knowledge_base = Chroma(
+            embedding_function=embeddings,
+            persist_directory=f'chroma_db_{os.getenv("confluence_email")}'
+        )
 
     return RetrievalQA.from_chain_type(
         llm=llm,
