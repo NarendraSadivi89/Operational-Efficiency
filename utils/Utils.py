@@ -98,7 +98,7 @@ def provision_snow(llm):
 
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
-    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
+    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=False)
 
 
 def provision_confluence(llm):
@@ -146,5 +146,5 @@ def provision_jira(llm):
     jira = JiraAPIWrapper()
     toolkit = JiraToolkit.from_jira_api_wrapper(jira)
     return initialize_agent(
-        toolkit.get_tools(), llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
+        toolkit.get_tools(), llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=False
     )
