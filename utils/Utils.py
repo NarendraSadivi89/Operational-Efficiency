@@ -36,15 +36,12 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
 
     keywords = extract_keywords(prompt)
-    print("printing keywords/n/n")
-    print(keywords)
-    print(" ".join(keywords))
 
     if seek_list[0]:
         with st.spinner('Loading...'):
-            response = chain(f"""Give me accurate information based on the '{prompt}'. If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
+            response = chain(f"""Give me accurate information based on the '{prompt}'. 
+                             If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
                                           """)
-
         st.write("From Confluence:\n\n")
         st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
 
@@ -61,8 +58,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[2]:
         with st.spinner('Loading...'):
-            response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. 
-                                     Give me accurate information based on the '{prompt}'. 
+            response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. Give me accurate information based on the '{prompt}'. 
                                      If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
@@ -119,7 +115,7 @@ def provision_confluence(llm):
         cloud=True)
 
     space_keys = [obj['key'] for obj in confluence.get_all_spaces(start=0, limit=500, expand=None)['results']]
-    print(space_keys)
+    
     all_documents = []
     for space_key in space_keys:
         documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
