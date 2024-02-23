@@ -16,22 +16,17 @@ from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-# Load the spaCy model
+
 nlp = spacy.load("en_core_web_sm")
 
 def extract_keywords(prompt):
-    # Process the prompt with spaCy
     doc = nlp(prompt)
-    
-    # Initialize a set to hold unique keywords
     keywords = set()
 
-    # Add nouns and proper nouns to keywords
     for token in doc:
         if token.pos_ in ["NOUN", "PROPN"]:
             keywords.add(token.text.lower())
     
-    # Add named entities to keywords
     for ent in doc.ents:
         keywords.add(ent.text.lower())
     
@@ -66,7 +61,6 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[2]:
         with st.spinner('Loading...'):
-            #response = sql_agent.run(prompt)
             response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. 
                                      Give me accurate information based on the '{prompt}'. 
                                      If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
@@ -75,7 +69,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-4-0125-preview', temperature=0)
+    llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
@@ -99,7 +93,7 @@ def provision_snow(llm):
     # cmdb_ci_application_software
 
     conn = sqlite3.connect("glide.db")
-    if os.path.exists('glide.db') and os.path.getsize('glide.db') == 0:
+    if os.path.getsize('glide.db') == 0:
         for table_name in table_list:
             gr = client.GlideRecord(table_name)
             gr.query()
@@ -130,21 +124,19 @@ def provision_confluence(llm):
     for space_key in space_keys:
         documents = loader.load(space_key=space_key, include_attachments=False, limit=50)
         all_documents.extend(documents)
-    #print(all_documents)
+
     tf = Html2TextTransformer()
     fd = tf.transform_documents(all_documents)
     ts = RecursiveCharacterTextSplitter(chunk_size=2000, chunk_overlap=400)
     splits = ts.split_documents(fd)
-    #print("printing ts/n/n")
-    #print(ts)
+
 
     embeddings = OpenAIEmbeddings()
     knowledge_base = Chroma.from_documents(
         documents=splits,
         embedding=embeddings
     )
-    #print("printing knowledge_base/n/n")
-    #print(knowledge_base)
+
 
     return RetrievalQA.from_chain_type(
         llm=llm,
@@ -152,8 +144,6 @@ def provision_confluence(llm):
         retriever=knowledge_base.as_retriever(),
         return_source_documents=True
     )
-    #print("printing chain /n/n")
-    #print(chain)
 
 
 def provision_jira(llm):
