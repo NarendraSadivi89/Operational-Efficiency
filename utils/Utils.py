@@ -53,7 +53,7 @@ def handle_conf(confluence_chain, prompt):
                 PROMPT: '{prompt}'
             """)
         st.write("From Confluence:\n\n")
-        if response["result"] == "I don't know":
+        if response["result"] == "I don't know.":
             st.chat_message('assistant').write(f'{response["result"]}')
         else:
             st.chat_message('assistant').write(
@@ -91,9 +91,9 @@ def handle_snow(sql_agent, prompt, keywords):
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0.05)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
