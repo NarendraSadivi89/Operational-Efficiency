@@ -53,7 +53,7 @@ class ChatPage:
                 'How do I set java sys PATH?',
                 type="primary"
             ):
-                st.session_state.pred_prompt = 'How do I set java sys PATH?'
+                st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
         with right_co_button:
             if st.button(
                 'What is Langchain?',

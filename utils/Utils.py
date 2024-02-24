@@ -1,7 +1,7 @@
 import os
-import spacy
 import pysnc
 import sqlite3
+import spacy
 import streamlit as st
 import pandas as pd
 from atlassian import Confluence
@@ -35,45 +35,69 @@ def extract_keywords(prompt):
 
 def handle_question(sql_agent, confluence_chain, jira_agent, prompt, seek_list):
     st.chat_message('user').write(prompt)
-
     keywords = extract_keywords(prompt)
 
     if seek_list[0]:
-        with st.spinner('Loading...'):
-            response = confluence_chain(
-                f"""You are a confluence chat bot. Give me the accurate information based on the '{prompt}' in the first hit. 
-                             If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
-                                          """)
-        st.write("From Confluence:\n\n")
-        st.chat_message('assistant').write(
-            f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
-
+        handle_conf(confluence_chain, prompt)
     if seek_list[1]:
-        with st.spinner('Loading...'):
-            try:
-                response = jira_agent.run(
-                    f"""You are a JIRA chatbot and give me any relevant information from JIRA based on the '{prompt}'
-                                          """)
-            except Exception:
-                response = "I don't know."
+        handle_jira(jira_agent, prompt)
+    if seek_list[2]:
+        handle_snow(sql_agent, prompt, keywords)
+
+
+def handle_conf(confluence_chain, prompt):
+    with st.spinner("Thinking..."):
+        response = confluence_chain(
+            f"""You are a confluence chat bot.
+                Give me an accurate summary of information based on the prompt below.
+                If you can't find a solution or don't have enough information, just say 'I don't know':
+                PROMPT: '{prompt}'
+            """)
+        st.write("From Confluence:\n\n")
+        if response["result"] == "I don't know":
+            st.chat_message('assistant').write(f'{response["result"]}')
+        else:
+            st.chat_message('assistant').write(
+                f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
+
+
+def handle_jira(jira_agent, prompt):
+    with st.spinner("Thinking..."):
+        try:
+            response = jira_agent.run(
+                f"""You are a JIRA chatbot.
+                    Give me a summary of any relevant information from JIRA based on the prompt below.
+                    If there is a ticket or user story related to the information, provide a link to it.
+                    If you can't find a solution or don't have enough information, just say 'I don't know':
+                    PROMPT: '{prompt}'
+                """)
+        except Exception:
+            response = "I don't know."
         st.write("From JIRA:\n\n")
         st.chat_message('assistant').write(response)
 
-    if seek_list[2]:
-        with st.spinner('Loading...'):
-            response = sql_agent.run(
-                f"""You are servicenow chatbot and have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. Give me accurate information based on the '{prompt}' in the first hit. 
-                                     If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
+
+def handle_snow(sql_agent, prompt, keywords):
+    with st.spinner("Thinking..."):
+        response = sql_agent.run(
+            f"""You are servicenow chatbot. 
+                Give me an accurate summary of information based on the prompt below.
+                If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
+                Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
+                PROMPT: '{prompt}'
+            """)
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
 
-    sql_agent = provision_snow(llm)
-    jira_agent = provision_jira(llm)
-    confluence_chain = provision_confluence(llm)
+    sql_agent = provision_snow(snow_llm)
+    jira_agent = provision_jira(jira_llm)
+    confluence_chain = provision_confluence(conf_llm)
 
     return sql_agent, jira_agent, confluence_chain
 
