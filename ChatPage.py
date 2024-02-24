@@ -1,9 +1,7 @@
 import os
-
+from utils.Utils import provision, handle_question
 import streamlit as st
 from dotenv import load_dotenv
-# from htmlTemplates import css
-from utils.Utils import provision, handle_question
 
 
 class ChatPage:
@@ -14,6 +12,8 @@ class ChatPage:
             header
     ):
         load_dotenv()
+        st.session_state.pred_prompt = None
+
         st.set_page_config(page_title=page_title, page_icon=page_icon)
         with st.sidebar:
             st.subheader('Helpful Info & Resources')
@@ -25,7 +25,7 @@ class ChatPage:
                 st.image('assets/TechStackDiagram.png')
                 st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
             with st.expander("View Atlassian source instance URLs"):
-                st.write (f'Confluence: {os.getenv("confluence_url")}\n\n'
+                st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
                          f'JIRA: {os.getenv("jira_instance_url")}\n\n'
                          f'ServiceNow/CMDB: {os.getenv("snow_url")}')
 
@@ -44,29 +44,34 @@ class ChatPage:
         seek_list = [seek_confluence, seek_jira, seek_snow]
 
         left_co_button, cent_co_button, right_co_button = st.columns([1, 1, 1])
-        pred_clicked = None
         with left_co_button:
-            pred_prompt = 'How do I reset my password?'
-            if st.button(pred_prompt, type="primary"):
-                pred_clicked = pred_prompt
+            if st.button(
+                'How do I reset my password?',
+                type="primary"
+            ):
+                st.session_state.pred_prompt = 'How do I reset my password?'
         with cent_co_button:
-            pred_prompt = 'How do I setup path system variables?'
-            if st.button(pred_prompt, type="primary"):
-                pred_clicked = pred_prompt
+            if st.button(
+                'How do I set java sys PATH?',
+                type="primary"
+            ):
+                st.session_state.pred_prompt = 'How do I setup system PATH variables?'
         with right_co_button:
-            pred_prompt = 'How do I setup selenium?'
-            if st.button(pred_prompt, type="primary"):
-                pred_clicked = pred_prompt
+            if st.button(
+                'How do I setup selenium?',
+                type="primary"
+            ):
+                st.session_state.pred_prompt = 'How do I setup selenium?'
 
         with st.spinner('Loading...'):
-            sql_agent, jira_agent, chain = provision()
+            sql_agent, jira_agent, confluence_chain = provision()
 
-        if pred_clicked:
-            handle_question(sql_agent, chain, jira_agent, pred_clicked, seek_list)
+        if st.session_state.pred_prompt:
+            handle_question(sql_agent, confluence_chain, jira_agent, st.session_state.pred_prompt, seek_list)
 
         st.container()
         if prompt := st.chat_input(placeholder="Ask about your Knowledge Base..."):
-            handle_question(sql_agent, chain, jira_agent, prompt, seek_list)
+            handle_question(sql_agent, confluence_chain, jira_agent, prompt, seek_list)
 
 
 if __name__ == '__main__':
