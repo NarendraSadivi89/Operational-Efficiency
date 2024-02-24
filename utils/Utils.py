@@ -39,8 +39,9 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[0]:
         with st.spinner('Loading...'):
-            response = chain(f"""You are a confluence chat bot. Give me the accurate information based on the '{prompt}'. 
-                             If you can't provide accurate information then at least provide closely matching information by searching all the spaces on the confluence matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
+            response = chain(f"""Give me the accurate information based on the '{prompt}'. 
+                             If you can't provide accurate ifnormation based on the '{prompt}' then at least provide closely matching information by searching content on all the spaces matching any of the '{keywords}' or matching '{" ".join(keywords)}. 
+                             Don't mention anything about keywords in your response.
                                           """)
         st.write("From Confluence:\n\n")
         st.chat_message('assistant').write(f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
@@ -48,7 +49,7 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
     if seek_list[1]:
         with st.spinner('Loading...'):
             try:
-                response = jira_agent.run(f"""You are a JIRA chatbot and give me any relevant information from JIRA based on the '{prompt}'
+                response = jira_agent.run(f"""You are a JIRA chatbot and give me any relevant information from JIRA based on the '{prompt}'. Don't mention anything about keywords in your response.
                                           """)
                                            #or matching any one of the '{keywords}' or matching '{" ".join(keywords)}'.                             
             except Exception:
@@ -58,14 +59,18 @@ def handle_question(sql_agent, chain, jira_agent, prompt, seek_list):
 
     if seek_list[2]:
         with st.spinner('Loading...'):
-            response = sql_agent.run(f"""You have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. Give me accurate information based on the '{prompt}'. 
-                                     If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and all the incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}. """)
+            response = sql_agent.run(f"""You are servicenow chatbot and have access to all the tables in ServiceNow and should be able to query all of these tables by connecting to glide.db. 
+                                     Get all the incidents and kb articles by matching the short desciption with any of the '{keywords}' or matching '{" ".join(keywords)}.
+                                     Limit your response to 2 closely matching incidents and 2 closely matching kb articles. 
+                                     Don't mention anything about keywords in your response.  
+                                     """)
+            #If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
 
 def provision():
-    llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    llm = ChatOpenAI(model='gpt-4-turbo-preview', temperature=0)
 
     sql_agent = provision_snow(llm)
     jira_agent = provision_jira(llm)
@@ -98,7 +103,7 @@ def provision_snow(llm):
 
     db = SQLDatabase.from_uri("sqlite:///glide.db")
 
-    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=False)
+    return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
 
 
 def provision_confluence(llm):
@@ -146,5 +151,5 @@ def provision_jira(llm):
     jira = JiraAPIWrapper()
     toolkit = JiraToolkit.from_jira_api_wrapper(jira)
     return initialize_agent(
-        toolkit.get_tools(), llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=False
+        toolkit.get_tools(), llm, agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=True
     )
