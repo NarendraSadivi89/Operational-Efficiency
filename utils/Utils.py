@@ -18,7 +18,6 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 nlp = spacy.load("en_core_web_sm")
 
-
 def extract_keywords(prompt):
     doc = nlp(prompt)
     keywords = set()
@@ -80,12 +79,13 @@ def handle_jira(jira_agent, prompt):
 def handle_snow(sql_agent, prompt, keywords):
     with st.spinner("Thinking..."):
         response = sql_agent.run(
-            f"""You are servicenow chatbot. 
-                Give me an accurate summary of information based on the prompt below.
-                If you can't provide accurate information then at least provide closely matching information by querying all the kb tables and incident tables matching any one of the '{keywords}' or matching '{" ".join(keywords)}.
+            f"""First get 2 incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}'.
+                Then get 3 kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'.
+                If you can't provide accurate information then at least provide closely matching information based on the below prompt.
                 Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
                 PROMPT: '{prompt}'
             """)
+        #Limit your response to 2 relevant incidents and 2 relevant kb articles. Don't mention anything about keywords in your response.
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 

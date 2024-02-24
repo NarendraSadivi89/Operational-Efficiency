@@ -1,6 +1,7 @@
 import os
 from utils.Utils import provision, handle_question
 import streamlit as st
+from dotenv import load_dotenv
 
 
 class ChatPage:
@@ -10,6 +11,7 @@ class ChatPage:
             page_icon,
             header
     ):
+        load_dotenv()
         st.session_state.pred_prompt = None
 
         st.set_page_config(page_title=page_title, page_icon=page_icon)
@@ -53,13 +55,13 @@ class ChatPage:
                 'How do I set java sys PATH?',
                 type="primary"
             ):
-                st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
+                st.session_state.pred_prompt = 'How do I setup system PATH variables?'
         with right_co_button:
             if st.button(
-                'What is Langchain?',
+                'How do I setup selenium?',
                 type="primary"
             ):
-                st.session_state.pred_prompt = 'What is Langchain?'
+                st.session_state.pred_prompt = 'How do I setup selenium?'
 
         with st.spinner('Loading...'):
             sql_agent, jira_agent, confluence_chain = provision()
