@@ -1,7 +1,7 @@
 import os
-import spacy
 import pysnc
 import sqlite3
+import spacy
 import streamlit as st
 import pandas as pd
 from atlassian import Confluence
@@ -16,8 +16,8 @@ from langchain_community.utilities.sql_database import SQLDatabase
 from langchain_community.vectorstores.chroma import Chroma
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
-
 nlp = spacy.load("en_core_web_sm")
+
 
 def extract_keywords(prompt):
     doc = nlp(prompt)

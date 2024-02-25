@@ -9,6 +9,9 @@ AI leveraging LLMs to chat with Confluence, ServiceNow, and CMDB data.
 ```commandline
 pip install -r requirements.txt
 ```
+```commandline
+python -m spacy download en_core_web_sm
+```
 ### Run
 ```commandline
 streamlit run ChatPage.py
