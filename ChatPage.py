@@ -27,7 +27,7 @@ class ChatPage:
                 st.image('assets/TechStackDiagram.png')
                 st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
             with st.expander("View Atlassian source instance URLs"):
-                st.write (f'Confluence: {os.getenv("confluence_url")}\n\n'
+                st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
                          f'JIRA: {os.getenv("jira_instance_url")}\n\n'
                          f'ServiceNow/CMDB: {os.getenv("snow_url")}')
 
