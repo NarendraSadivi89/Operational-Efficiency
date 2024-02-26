@@ -79,21 +79,23 @@ def handle_jira(jira_agent, prompt):
 def handle_snow(sql_agent, prompt, keywords):
     with st.spinner("Thinking..."):
         response = sql_agent.run(
-            f"""First get 2 incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}'.
-                Then get 3 kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'.
-                If you can't provide accurate information then at least provide closely matching information based on the below prompt. Don't mention anything about the select query or the keywords.
-                Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
-                PROMPT: '{prompt}'
+            f"""Get me the results based on the '{prompt}'.  
+                If you can't provide results based on the '{prompt}' then 
+                firstly, get 2 incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}' and 
+                secondly, get 3 kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
+                Run the select query needed to get the results but don't mention anything about select query or '{keywords}' in your response..
+                Finally, if you can't find anything then just say "I don't know".               
             """)
+        #Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
         #Limit your response to 2 relevant incidents and 2 relevant kb articles. Don't mention anything about keywords in your response.
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
