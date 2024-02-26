@@ -1,4 +1,5 @@
 import os
+from utils.CheckPassword import check_password
 from utils.Utils import provision, handle_question
 import streamlit as st
 from dotenv import load_dotenv
@@ -11,7 +12,9 @@ class ChatPage:
             page_icon,
             header
     ):
-        load_dotenv()
+        if not check_password():
+            st.stop()
+
         st.session_state.pred_prompt = None
 
         st.set_page_config(page_title=page_title, page_icon=page_icon)
@@ -52,7 +55,7 @@ class ChatPage:
                 st.session_state.pred_prompt = 'How do I reset my password?'
         with cent_co_button:
             if st.button(
-                'How do I set java sys PATH?',
+                'How do I set java system PATH on Windows?',
                 type="primary"
             ):
                 st.session_state.pred_prompt = 'How do I setup system PATH variables?'
