@@ -91,9 +91,9 @@ def handle_snow(sql_agent, prompt, keywords):
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0.05)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
@@ -123,7 +123,6 @@ def provision_snow(llm):
                     df.to_sql(table_name, conn, if_exists='replace')
             except Exception as e:
                 print(e)
-    print(glide_db_string)
     db = SQLDatabase.from_uri(f"sqlite:///{glide_db_string}")
 
     return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)

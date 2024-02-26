@@ -15,6 +15,7 @@ class ChatPage:
         load_dotenv()
         if not check_password():
             st.stop()
+        st.session_state["username"] = st.session_state["username"]
 
         st.session_state.pred_prompt = None
 
