@@ -53,7 +53,7 @@ def handle_conf(confluence_chain, prompt):
                 PROMPT: '{prompt}'
             """)
         st.write("From Confluence:\n\n")
-        if response["result"] == "I don't know.":
+        if response["result"] == "I don't know":
             st.chat_message('assistant').write(f'{response["result"]}')
         else:
             st.chat_message('assistant').write(
@@ -81,7 +81,7 @@ def handle_snow(sql_agent, prompt, keywords):
         response = sql_agent.run(
             f"""First get 2 incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}'.
                 Then get 3 kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'.
-                If you can't provide accurate information then at least provide closely matching information based on the below prompt.
+                If you can't provide accurate information then at least provide closely matching information based on the below prompt. Don't mention anything about the select query or the keywords.
                 Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
                 PROMPT: '{prompt}'
             """)
@@ -104,18 +104,9 @@ def provision():
 
 def provision_snow(llm):
     client = pysnc.ServiceNowClient(os.getenv('snow_url'), (os.getenv('snow_user'), os.getenv('snow_pass')))
-    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'core_company', 'cmn_location', 'cmn_cost_center',
-                  'cmn_department', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
+    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
                   'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
                   'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer']
-    
-    #'cmdb_ci_database', 'cmdb_ci_service','cmdb_ci_storage_device', 'cmdb_class_info', 'alm_asset', 'cmdb_model'
-    # 'incident_task',
-    # 'change_request_template', 'change_collision',
-    # cmdb_ci_network_host,
-    # cmdb_ci_cloud_service_account
-    # cmdb_ci_network_adapter
-    # cmdb_ci_application_software
 
     conn = sqlite3.connect("glide.db")
     if os.path.getsize('glide.db') == 0:

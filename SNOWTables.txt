@@ -1,0 +1,9 @@
+    
+    #'cmdb_ci_database', 'cmdb_ci_service','cmdb_ci_storage_device', 'cmdb_class_info', 'alm_asset', 'cmdb_model'
+    # 'incident_task',
+    # 'change_request_template', 'change_collision',
+    # cmdb_ci_network_host,
+    # cmdb_ci_cloud_service_account
+    # cmdb_ci_network_adapter
+    # cmdb_ci_application_software
+    

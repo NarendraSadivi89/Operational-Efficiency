@@ -12,6 +12,7 @@ class ChatPage:
             page_icon,
             header
     ):
+        load_dotenv()
         if not check_password():
             st.stop()
 
