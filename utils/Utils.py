@@ -110,12 +110,6 @@ def provision_snow(llm):
         'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
         'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer'
     ]
-    # 'incident_task',
-    # 'change_request_template', 'change_collision',
-    # cmdb_ci_network_host,
-    # cmdb_ci_cloud_service_account
-    # cmdb_ci_network_adapter
-    # cmdb_ci_application_software
 
     glide_db_string = f"glide_{os.getenv('snow_user')}.db"
     conn = sqlite3.connect(glide_db_string)
