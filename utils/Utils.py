@@ -91,9 +91,9 @@ def handle_snow(sql_agent, prompt, keywords):
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0.05)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
@@ -104,11 +104,12 @@ def provision():
 
 def provision_snow(llm):
     client = pysnc.ServiceNowClient(os.getenv('snow_url'), (os.getenv('snow_user'), os.getenv('snow_pass')))
-    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'core_company', 'cmn_location', 'cmn_cost_center',
-                  'cmn_department', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
-                  'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
-                  'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer', 'cmdb_ci_database', 'cmdb_ci_service',
-                  'cmdb_ci_storage_device', 'cmdb_class_info', 'alm_asset', 'cmdb_model']
+    table_list = [
+        'task', 'incident', 'sys_user', 'sys_user_group', 'problem', 'wf_workflow',
+        'kb_knowledge_base', 'kb_category', 'kb_knowledge',
+        'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
+        'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer'
+    ]
     # 'incident_task',
     # 'change_request_template', 'change_collision',
     # cmdb_ci_network_host,
@@ -116,15 +117,19 @@ def provision_snow(llm):
     # cmdb_ci_network_adapter
     # cmdb_ci_application_software
 
-    conn = sqlite3.connect("glide.db")
-    if os.path.getsize('glide.db') == 0:
+    glide_db_string = f"glide_{os.getenv('snow_user')}.db"
+    conn = sqlite3.connect(glide_db_string)
+    if os.path.getsize(glide_db_string) == 0:
         for table_name in table_list:
             gr = client.GlideRecord(table_name)
-            gr.query()
-            df = pd.DataFrame(gr.to_pandas())
-            df.to_sql(table_name, conn, if_exists='replace')
-
-    db = SQLDatabase.from_uri("sqlite:///glide.db")
+            try:
+                gr.query()
+                if gr.has_next():
+                    df = pd.DataFrame(gr.to_pandas())
+                    df.to_sql(table_name, conn, if_exists='replace')
+            except Exception as e:
+                print(e)
+    db = SQLDatabase.from_uri(f"sqlite:///{glide_db_string}")
 
     return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
 

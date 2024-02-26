@@ -13,11 +13,13 @@ class ChatPage:
     ):
         if not check_password():
             st.stop()
+        st.session_state["username"] = st.session_state["username"]
 
         st.session_state.pred_prompt = None
 
         st.set_page_config(page_title=page_title, page_icon=page_icon)
         with st.sidebar:
+            st.subheader(f"👋 Welcome {st.session_state['username']}")
             st.subheader('Helpful Info & Resources')
             st.info('ℹ  Use the Knowledge Base Chatbot to ask questions in regards to your Confluence, ServiceNOW, '
                     'CMDB, and JIRA instances. You can scope your query to specific knowledge bases using the \'Seek '

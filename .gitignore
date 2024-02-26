@@ -1,5 +1,11 @@
 .env
+.env.sub-user
 .venv/
 .idea/*
 **/__pycache__/
 glide.db/*
+_pycache_/*
+_pycache_
+glide.db
+.streamlit/
+chroma_db/

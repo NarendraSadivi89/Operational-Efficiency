@@ -1,7 +1,7 @@
 import hmac
 import os
 import streamlit as st
-from dotenv import load_dotenv, dotenv_values
+from dotenv import dotenv_values
 
 
 def check_password():
@@ -28,7 +28,8 @@ def check_password():
         ):
             st.session_state["password_correct"] = True
             if st.session_state["username"] == "admin":
-                load_dotenv()
+                config = dotenv_values(".env")
+                set_env_vars(config)
             elif st.session_state["username"] == "sub_user":
                 config = dotenv_values(".env.sub-user")
                 set_env_vars(config)
