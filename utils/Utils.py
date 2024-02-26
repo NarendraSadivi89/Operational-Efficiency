@@ -104,19 +104,33 @@ def provision():
 
 def provision_snow(llm):
     client = pysnc.ServiceNowClient(os.getenv('snow_url'), (os.getenv('snow_user'), os.getenv('snow_pass')))
-    table_list = ['task', 'incident', 'sys_user', 'sys_user_group', 'problem', 'wf_workflow', 'kb_knowledge_base', 'kb_category', 'kb_knowledge',
-                  'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
-                  'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer']
+    table_list = [
+        'task', 'incident', 'sys_user', 'sys_user_group', 'problem', 'wf_workflow',
+        'kb_knowledge_base', 'kb_category', 'kb_knowledge',
+        'kb_feedback', 'change_request', 'change_task', 'std_change_producer_version',
+        'cmdb', 'cmdb_ci', 'cmdb_rel_ci', 'cmdb_ci_computer'
+    ]
+    # 'incident_task',
+    # 'change_request_template', 'change_collision',
+    # cmdb_ci_network_host,
+    # cmdb_ci_cloud_service_account
+    # cmdb_ci_network_adapter
+    # cmdb_ci_application_software
 
-    conn = sqlite3.connect("glide.db")
-    if os.path.getsize('glide.db') == 0:
+    glide_db_string = f"glide_{os.getenv('snow_user')}.db"
+    conn = sqlite3.connect(glide_db_string)
+    if os.path.getsize(glide_db_string) == 0:
         for table_name in table_list:
             gr = client.GlideRecord(table_name)
-            gr.query()
-            df = pd.DataFrame(gr.to_pandas())
-            df.to_sql(table_name, conn, if_exists='replace')
-
-    db = SQLDatabase.from_uri("sqlite:///glide.db")
+            try:
+                gr.query()
+                if gr.has_next():
+                    df = pd.DataFrame(gr.to_pandas())
+                    df.to_sql(table_name, conn, if_exists='replace')
+            except Exception as e:
+                print(e)
+    print(glide_db_string)
+    db = SQLDatabase.from_uri(f"sqlite:///{glide_db_string}")
 
     return create_sql_agent(llm, db=db, agent_type="openai-tools", verbose=True)
 
