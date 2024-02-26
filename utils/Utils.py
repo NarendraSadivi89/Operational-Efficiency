@@ -54,7 +54,7 @@ def handle_conf(confluence_chain, prompt):
                 PROMPT: '{prompt}'
             """)
         st.write("From Confluence:\n\n")
-        if response["result"] == "I don't know.":
+        if "I don't know" in response["result"]:
             st.chat_message('assistant').write(f'{response["result"]}')
         else:
             st.chat_message('assistant').write(
@@ -67,8 +67,7 @@ def handle_jira(jira_agent, prompt):
             response = jira_agent.run(
                 f"""You are a JIRA chatbot.
                     Give me a summary of any relevant information from JIRA based on the prompt below.
-                    If there is a ticket or user story related to the information, provide a link to it.
-                    If you can't find a solution or don't have enough information, just say 'I don't know':
+                    If you can't find anything based on the prompt, just say 'I don't know':
                     PROMPT: '{prompt}'
                 """)
         except Exception:
@@ -91,9 +90,9 @@ def handle_snow(sql_agent, prompt, keywords):
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-0125', temperature=0)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
