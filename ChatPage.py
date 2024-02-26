@@ -13,6 +13,7 @@ class ChatPage:
     ):
         if not check_password():
             st.stop()
+        st.session_state["username"] = st.session_state["username"]
 
         st.session_state.pred_prompt = None
 
