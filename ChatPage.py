@@ -47,13 +47,18 @@ class ChatPage:
 
         seek_list = [seek_confluence, seek_jira, seek_snow]
 
-        left_co_button, cent_co_button, right_co_button, far_co_button, r_far_co_button = st.columns([1, 1, 1, 1, 1])
+        left_co_button, cent_co_button, right_co_button, far_co_button = st.columns([1, 1, 1, 1])
         with left_co_button:
             if st.button(
                 'How do I reset my password?',
                 type="primary"
             ):
                 st.session_state.pred_prompt = 'How do I reset my password?'
+            if st.button(
+                    'How do I setup Selenium?',
+                    type="primary"
+            ):
+                st.session_state.pred_prompt = 'How do I setup Selenium?'
         with cent_co_button:
             if st.button(
                 'How do I set java system PATH on Windows?',
@@ -62,22 +67,16 @@ class ChatPage:
                 st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
         with right_co_button:
             if st.button(
-                'How do I setup Selenium?',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'How do I setup Selenium?'
-        with far_co_button:
-            if st.button(
                 'How many open tickets are in ITSM sample space project?',
                 type="primary"
             ):
                 st.session_state.pred_prompt = 'How many open tickets are in ITSM sample space project?'
-        with r_far_co_button:
+        with far_co_button:
             if st.button(
-                'Can you get me the summary of ticket with key GT-4?',
+                'Give me information on ticket with key GT-4.',
                 type="primary"
             ):
-                st.session_state.pred_prompt = 'Can you get me the summary of ticket with key GT-4?'
+                st.session_state.pred_prompt = 'Give me information on ticket with key GT-4.'
 
         with st.spinner('Loading...'):
             sql_agent, jira_agent, confluence_chain = provision()
