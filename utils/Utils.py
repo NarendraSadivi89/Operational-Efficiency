@@ -54,7 +54,7 @@ def handle_conf(confluence_chain, prompt):
             """)
         st.write("From Confluence:\n\n")
         if "I don't know" in response["result"]:
-        if response["result"] == "I don't know":
+        #if response["result"] == "I don't know":
             st.chat_message('assistant').write(f'{response["result"]}')
         else:
             st.chat_message('assistant').write(
@@ -79,10 +79,10 @@ def handle_jira(jira_agent, prompt):
 def handle_snow(sql_agent, prompt, keywords):
     with st.spinner("Thinking..."):
         response = sql_agent.run(
-            f"""Get me the results based on the '{prompt}'.  
-                If you can't provide results based on the '{prompt}' then 
-                firstly, get the incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}' and 
-                secondly, get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
+            f"""You have access to glide_'{os.getenv('snow_user')}'.db and you are an sql expert who can query or join the tables based on the '{prompt}'. 
+                Run the select query needed in the background and give me the records or result set but don't give me the select query.
+                If you can't provide results based on the '{prompt}' or query then get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
+                Then provide detailed information about the kb article which you have retrieved. Make sure to include kb article id and kb article link.
                 Run the select query needed to get the results but don't mention anything about select query or '{keywords}' in your response.
                 Finally, if you can't find anything then just say "I don't know".               
             """)
@@ -93,12 +93,9 @@ def handle_snow(sql_agent, prompt, keywords):
 
 
 def provision():
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
+    conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
+    jira_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
+    snow_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0.05)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
