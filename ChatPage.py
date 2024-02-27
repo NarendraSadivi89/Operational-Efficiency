@@ -27,10 +27,10 @@ class ChatPage:
                     'CMDB, and JIRA instances. You can scope your query to specific knowledge bases using the \'Seek '
                     'answers from:\' expander. Input your question in the provided space towards the bottom of the '
                     'screen and send to get your answer.')
-            with st.expander("Take a look under the hood"):
-                st.image('assets/TechStackDiagram.png')
-                st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
-            with st.expander("View Atlassian source instance URLs"):
+            # with st.expander("Take a look under the hood"):
+            #     st.image('assets/TechStackDiagram.png')
+            #     st.write('Above is the tech stack diagram. You may expand the image or sidebar for better viewing.')
+            with st.expander("View source instance URLs"):
                 st.write(f'Confluence: {os.getenv("confluence_url")}\n\n'
                          f'JIRA: {os.getenv("jira_instance_url")}\n\n'
                          f'ServiceNow/CMDB: {os.getenv("snow_url")}')
@@ -49,39 +49,42 @@ class ChatPage:
 
         seek_list = [seek_confluence, seek_jira, seek_snow]
 
-        left_co_button, cent_co_button, right_co_button, far_co_button = st.columns([1, 1, 1, 1])
-        with left_co_button:
-            if st.button(
-                'How do I reset my password?',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'How do I reset my password?'
-            if st.button(
-                    'How do I setup Selenium?',
-                    type="primary"
-            ):
-                st.session_state.pred_prompt = 'How do I setup Selenium?'
-        with cent_co_button:
-            if st.button(
-                'How do I set java system PATH on Windows?',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'How do I setup system PATH variables?'
-        with right_co_button:
-            if st.button(
-                'How many open tickets are in ITSM sample space project?',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'How many open tickets are in ITSM sample space project?'
-        with far_co_button:
-            if st.button(
-                'Give me information on ticket with key GT-4.',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'Give me information on ticket with key GT-4.'
-
         with st.spinner('Loading...'):
             sql_agent, jira_agent, confluence_chain = provision()
+
+            left_co_button, cent_co_button, right_co_button= st.columns([1, 1, 1])
+            with left_co_button:
+                if st.button(
+                        'How do I reset my password?',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'How do I reset my password?'
+            with cent_co_button:
+                if st.button(
+                        'How do I setup Selenium?',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'How do I setup Selenium?'
+            with right_co_button:
+                if st.button(
+                        'How do I set java system PATH on Windows?',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
+
+            far_co_button, far_far_co_button = st.columns([1, 1])
+            with far_co_button:
+                if st.button(
+                        'How many open tickets are in ITSM sample space project?',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'How many open tickets are in ITSM sample space project?'
+            with far_far_co_button:
+                if st.button(
+                        'Give me information on ticket with key GT-4.',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'Give me information on ticket with key GT-4.'
 
         if st.session_state.pred_prompt:
             handle_question(sql_agent, confluence_chain, jira_agent, st.session_state.pred_prompt, seek_list)

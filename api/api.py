@@ -1,4 +1,3 @@
-import json
 import os
 import sqlite3
 import pysnc
@@ -150,7 +149,9 @@ def api_question():
             "result": confluence_response["result"]
         }
         if "I don't know" not in confluence_response["result"]:
-            response["confluence"]["source"] = confluence_response["source_documents"][0].metadata["source"]
+            source_split = confluence_response['source_documents'][0].metadata['source'].split('.net/')
+            source = f"{source_split[0]}.net/wiki/{source_split[1]}"
+            response["confluence"]["source"] = source
 
     if "jira" in seek_list:
         jira_agent = provision_jira()
