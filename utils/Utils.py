@@ -57,8 +57,10 @@ def handle_conf(confluence_chain, prompt):
         if "I don't know" in response["result"]:
             st.chat_message('assistant').write(f'{response["result"]}')
         else:
+            source_split = response['source_documents'][0].metadata['source'].split('.net/')
+            source = f"{source_split[0]}.net/wiki/{source_split[1]}"
             st.chat_message('assistant').write(
-                f'{response["result"]}\n\n Source URL: {response['source_documents'][0].metadata['source']}')
+                f'{response["result"]}\n\n Source URL: {source}')
 
 
 def handle_jira(jira_agent, prompt):
