@@ -83,8 +83,7 @@ def handle_snow(sql_agent, prompt, keywords):
                 If you can't provide results based on the '{prompt}' or query then get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. Run the select query needed in the background and give me the records or result set returned by query but don't give me the select query or '{keywords}' in your response. Then provide detailed information about the kb article which you have retrieved from the query. Make sure to include kb article id and kb article link.
                 Finally, if you can't find anything then just say "I don't know".               
             """)
-        #Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
-        #Limit your response to 2 relevant incidents and 2 relevant kb articles. Don't mention anything about keywords in your response.
+
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
