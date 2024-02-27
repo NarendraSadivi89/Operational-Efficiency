@@ -77,11 +77,6 @@ class ChatPage:
                 type="primary"
             ):
                 st.session_state.pred_prompt = 'Give me information on ticket with key GT-4.'
-            if st.button(
-                'What is the key of ticket with summary of "This is test change ticket"?',
-                type="primary"
-            ):
-                st.session_state.pred_prompt = 'What is the key of ticket with summary of "This is test change ticket"?'
 
         with st.spinner('Loading...'):
             sql_agent, jira_agent, confluence_chain = provision()
