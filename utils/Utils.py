@@ -81,9 +81,9 @@ def handle_snow(sql_agent, prompt, keywords):
         response = sql_agent.run(
             f"""Get me the results based on the '{prompt}'.  
                 If you can't provide results based on the '{prompt}' then 
-                firstly, get 2 incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}' and 
-                secondly, get 3 kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
-                Run the select query needed to get the results but don't mention anything about select query or '{keywords}' in your response..
+                firstly, get the incidents by querying all the incident tables matching short description with any of the '{keywords}' or '{" ".join(keywords)}' and 
+                secondly, get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
+                Run the select query needed to get the results but don't mention anything about select query or '{keywords}' in your response.
                 Finally, if you can't find anything then just say "I don't know".               
             """)
         #Finally, if you can't find a solution or make a summary do not make one up, just say 'I don't know':
