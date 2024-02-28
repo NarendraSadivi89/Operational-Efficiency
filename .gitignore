@@ -6,8 +6,8 @@
 glide.db/*
 _pycache_/*
 _pycache_
-glide.db
+glide_*.db
 .streamlit/
-chroma_db/
+chroma_db_*/
 SNOWPrompts.txt
 SNOWTables.txt
