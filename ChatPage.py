@@ -73,10 +73,10 @@ class ChatPage:
                     st.session_state.pred_prompt = 'How do I reset my password?'
             with cent_co_button:
                 if st.button(
-                        'How do I set java system PATH on Windows?',
+                        'How do I set PATH variable?',
                         type="primary"
                 ):
-                    st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
+                    st.session_state.pred_prompt = 'How do I set PATH variable?'
             with right_co_button:
                 if st.button(
                         'How do I setup Selenium?',
