@@ -67,10 +67,10 @@ class ChatPage:
                     st.session_state.pred_prompt = 'How do I setup Selenium?'
             with right_co_button:
                 if st.button(
-                        'How do I set java system PATH on Windows?',
+                        'How do I setup java system path variables in different operating systems?',
                         type="primary"
                 ):
-                    st.session_state.pred_prompt = 'How do I set java system PATH on Windows?'
+                    st.session_state.pred_prompt = 'How do I setup java system path variables in different operating systems?'
 
             far_co_button, far_far_co_button = st.columns([1, 1])
             with far_co_button:

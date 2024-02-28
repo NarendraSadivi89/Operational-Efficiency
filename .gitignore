@@ -9,3 +9,5 @@ _pycache_
 glide.db
 .streamlit/
 chroma_db/
+SNOWPrompts.txt
+SNOWTables.txt

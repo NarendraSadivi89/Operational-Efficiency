@@ -6,4 +6,13 @@
     # cmdb_ci_cloud_service_account
     # cmdb_ci_network_adapter
     # cmdb_ci_application_software
+    #Sys_db_object
+    #Sys_db_view
+    #Sys_user  -- users table
+    #Sys_user_group -- groups table
+    #Sys_user_role -- roles table
+    #Sys_user_has_role -- mapping table of users and roles
+    #Sys_user_grmember --mapping table of users and groups
+    #Sys_group_has_role -- mapping table of groups and roles
+    #sys_security_acl - ACLs are conditions that control access over tables with create, delete, update permissions
     
