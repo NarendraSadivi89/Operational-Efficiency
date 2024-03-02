@@ -93,7 +93,7 @@ def handle_snow(sql_agent, prompt, keywords):
 def provision():
     conf_llm = ChatOpenAI(model='gpt-3.5-turbo-16k-0613', temperature=0)
     jira_llm = ChatOpenAI(model='gpt-4-turbo-preview', temperature=0)
-    snow_llm = ChatOpenAI(model='gpt-4-turbo-preview', temperature=0.05)
+    snow_llm = ChatOpenAI(model='gpt-4-turbo-preview', temperature=0)
 
     sql_agent = provision_snow(snow_llm)
     jira_agent = provision_jira(jira_llm)
