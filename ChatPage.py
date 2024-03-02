@@ -52,7 +52,21 @@ class ChatPage:
         with st.spinner('Loading...'):
             sql_agent, jira_agent, confluence_chain = provision()
 
-            left_co_button, cent_co_button, right_co_button= st.columns([1, 1, 1])
+            far_co_button, far_far_co_button = st.columns([1, 1])
+            with far_co_button:
+                if st.button(
+                        'How many tickets are in GenAITeam project?',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'How many tickets are in GenAITeam project?'
+            with far_far_co_button:
+                if st.button(
+                        'Give me information on ticket with key GT-4.',
+                        type="primary"
+                ):
+                    st.session_state.pred_prompt = 'Give me information on ticket with key GT-4.'
+
+            left_co_button, cent_co_button, right_co_button = st.columns([1, 1, 1])
             with left_co_button:
                 if st.button(
                         'How do I reset my password?',
@@ -61,10 +75,10 @@ class ChatPage:
                     st.session_state.pred_prompt = 'How do I reset my password?'
             with cent_co_button:
                 if st.button(
-                        'How do I setup Selenium?',
+                        'How do I set PATH variable?',
                         type="primary"
                 ):
-                    st.session_state.pred_prompt = 'How do I setup Selenium?'
+                    st.session_state.pred_prompt = 'How do I set PATH variable?'
             with right_co_button:
                 if st.button(
                         'How do I setup java system path variables in different operating systems?',
