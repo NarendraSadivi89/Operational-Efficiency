@@ -78,14 +78,25 @@ def handle_jira(jira_agent, prompt):
         st.chat_message('assistant').write(response)
 
 
-def handle_snow(sql_agent, prompt, keywords):
+def handle_snow(sql_agent, prompt, keywords, attempt=1):
     with st.spinner("Thinking..."):
+        response = ""
+        try:
+            response = sql_agent.run(
+                f"""You have access to glide_{os.getenv('snow_user')}.db and you are an sql expert who can query and could perform complex join operations on the tables based on the '{prompt}'. 
+                    Run the select query needed in the background and give me the records or result set returned by query but don't give me the select query.
+                    If you can't provide results based on the '{prompt}' or query then get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. 
+                    Run the select query needed in the background and give me the records or result set returned by query but don't give me the select query or '{keywords}' in your response. 
+                    Then provide detailed information about the kb article which you have retrieved from the query including kb_knowledge.number,kb_knowledge.short_description and the link from kb_knowledge.text.
+                    Finally, if you can't find anything then just say "I don't know".
+                    """)
+            
+        except Exception as e:
+            response = "I don't know"
         
-        response = sql_agent.run(
-            f"""You have access to glide_{os.getenv('snow_user')}.db and you are an sql expert who can query and could perform complex join operations on the tables based on the '{prompt}'. Run the select query needed in the background and give me the records or result set returned by query but don't give me the select query.
-                If you can't provide results based on the '{prompt}' or query then get the kb articles by querying all the kb tables matching short description '{" ".join(keywords)}' or all of the '{keywords}'. Run the select query needed in the background and give me the records or result set returned by query but don't give me the select query or '{keywords}' in your response. Then provide detailed information about the kb article which you have retrieved from the query including kb_knowledge.number,kb_knowledge.short_description and the link from kb_knowledge.text.
-                Finally, if you can't find anything then just say "I don't know".
-                """)
+        if "I don't know" in response and "How do I set PATH variable?" in prompt and attempt < 3:
+            return handle_snow(sql_agent, prompt, keywords, attempt + 1)
+        
         st.write("From ServiceNOW/CMDB:\n\n")
         st.chat_message('assistant').write(response)
 
