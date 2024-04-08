@@ -1,0 +1,13 @@
+.env
+.env.sub-user
+.venv/
+.idea/*
+**/__pycache__/
+glide.db/*
+_pycache_/*
+_pycache_
+glide_*.db
+.streamlit/
+chroma_db_*/
+SNOWPrompts.txt
+SNOWTables.txt
